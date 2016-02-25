@@ -69,17 +69,57 @@ Route::group(['middleware' => ['web']], function () {
 	return view('productlist',compact('type'));
 	});
 	
+	// Users
+	
 	Route::get('users/create', function(){
 		return view('registerform');
 	});
+		
+		// To view
+		Route::get('users/{id}', function($id){
+			$user = App\Models\User::find($id);
+					// 'userdetails',['type'=>$type]
+			return view('userdetails',['user'=>$user]);
+		});
 	
-	Route::get('users/{id}', function($id){
+		Route::post('users', function(App\Http\Requests\CreateUserRequest $req){
+			$user = App\Models\User::create(Request::all());
+			return redirect('users/'.$user->id);
+		});
+	
+	Route::get('users/{id}/edit', function($id){
 		$user = App\Models\User::find($id);
-				// 'userdetails',['type'=>$type]
-		return view('userdetails',['user'=>$user]);
+		return view('edituserform',['user'=>$user]);
 	});
 	
-	Route::post('users', function(App\Http\Requests\CreateUserRequest $req){
-		$user = App\Models\User::create(Request::all());
+		Route::put('users/{id}', function(App\Http\Requests\EditUserRequest $req, $id){
+			$user = App\Models\User::find($id);
+			$user->fill(Request::all());
+			$user->save();
+			return redirect('users/'.$id);
+		});
+	
+	// Products
+	
+	Route::get('products/create', function(){
+		return view('createproductform');
 	});
+	
+		Route::post('products', function(App\Http\Requests\CreateProductRequest $req){
+			$product = App\Models\Product::create(Request::all());
+			return redirect('types/'.$product->type_id);
+		});
+	
+	Route::get('products/{id}/edit', function($id){
+		$product = App\Models\Product::find($id);
+		return view('editproductform',['product'=>$product]);
+	});
+	
+		Route::put('products/{id}', function(App\Http\Requests\EditProductRequest $req, $id){
+			$product = App\Models\Product::find($id);
+			$product->fill(Request::all());
+			$product->save();
+			return redirect('types/'.$product->type_id);
+		});
+	
 });
