@@ -69,8 +69,9 @@ Route::group(['middleware' => ['web']], function () {
 	return view('productlist',compact('type'));
 	});
 	
-	// Users
+	// Users 
 	
+		// To Create
 	Route::get('users/create', function(){
 		return view('registerform');
 	});
@@ -87,6 +88,8 @@ Route::group(['middleware' => ['web']], function () {
 			return redirect('users/'.$user->id);
 		});
 	
+	
+		// To edit
 	Route::get('users/{id}/edit', function($id){
 		$user = App\Models\User::find($id);
 		return view('edituserform',['user'=>$user]);
@@ -99,6 +102,16 @@ Route::group(['middleware' => ['web']], function () {
 			return redirect('users/'.$id);
 		});
 	
+		// To login
+	Route::get('login', function(){
+		return view('loginform');
+	});
+	Route::post('login', function(){
+		//processing
+	});
+
+	
+	
 	// Products
 	
 	Route::get('products/create', function(){
@@ -107,8 +120,18 @@ Route::group(['middleware' => ['web']], function () {
 	
 		Route::post('products', function(App\Http\Requests\CreateProductRequest $req){
 			$product = App\Models\Product::create(Request::all());
+			
+			$newName = "photo".$product->id."jpg";
+			$file = Request::file("photo");
+			
+			$file->move("productphotos",$newName);
+			$product->photo = $newName;
+			$product->save();
+			
 			return redirect('types/'.$product->type_id);
 		});
+	
+		
 	
 	Route::get('products/{id}/edit', function($id){
 		$product = App\Models\Product::find($id);

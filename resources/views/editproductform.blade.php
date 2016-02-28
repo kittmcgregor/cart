@@ -26,7 +26,7 @@
 					{!!$errors->first('photo','<p class="error">:message</p>')!!}
 					
 					<label for="">Type.</label>
-					{{Form::text('type_id')}}
+					{{Form::select('type_id', \App\Models\Type::lists('name','id'))}}
 					{!!$errors->first('type_id','<p class="error">:message</p>')!!}
 					
 					<input type="reset" value="Reset">

@@ -4,7 +4,7 @@
 	
 			<h2>Create Product</h2>
 			
-			{{ Form::open(array('url' => 'products')) }}
+			{{ Form::open(array('url' => 'products', 'files'=>true)) }}
 			
 			<form action="">
 				<fielset>
@@ -22,17 +22,17 @@
 					{!!$errors->first('price','<p class="error">:message</p>')!!}
 										
 					<label for="">Photo.</label>
-					{{Form::text('photo')}}
+					{{Form::file('photo')}}
 					{!!$errors->first('photo','<p class="error">:message</p>')!!}
 					
 					<label for="">Type.</label>
-					{{Form::text('type_id')}}
+					{{Form::select('type_id', \App\Models\Type::lists('name','id'))}}
 					{!!$errors->first('type_id','<p class="error">:message</p>')!!}
 					
 					<input type="reset" value="Reset">
 					<input type="submit" value="Submit">
 				</fielset>
 			</form>
-			{{ Form::close()}}
+			{{ Form::close()}}	
 				
 @stop
