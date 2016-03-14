@@ -64,6 +64,7 @@ Route::get('/', function () {
 Route::group(['middleware' => ['web']], function () {
 	
     Route::get('types/{id}', function($id){
+	    sleep(1);
 	$type = App\Models\Type::find($id);
 			// 'productlist',['type'=>$type]
 	return view('productlist',compact('type'));
@@ -85,6 +86,9 @@ Route::group(['middleware' => ['web']], function () {
 	
 		Route::post('users', function(App\Http\Requests\CreateUserRequest $req){
 			$user = App\Models\User::create(Request::all());
+			
+			$user->password = bcrypt($user->password);
+			$user->save();
 			return redirect('users/'.$user->id);
 		});
 	
@@ -93,7 +97,7 @@ Route::group(['middleware' => ['web']], function () {
 	Route::get('users/{id}/edit', function($id){
 		$user = App\Models\User::find($id);
 		return view('edituserform',['user'=>$user]);
-	});
+	})->middleware(['auth']);
 	
 		Route::put('users/{id}', function(App\Http\Requests\EditUserRequest $req, $id){
 			$user = App\Models\User::find($id);
@@ -102,47 +106,70 @@ Route::group(['middleware' => ['web']], function () {
 			return redirect('users/'.$id);
 		});
 	
-		// To login
-	Route::get('login', function(){
-		return view('loginform');
-	});
-	Route::post('login', function(){
-		//processing
+	// login
+	Route::get('login', "LoginController@showLoginForm");
+	// validate
+	Route::post('login', "LoginController@processLogin");
+	// logout
+	Route::get('logout', "LoginController@logout");
+	
+	//Products
+	Route::resource('products', 'productController');
+	
+	// Cart
+	Route::get('cart-items', function(){
+		return view('showcart');
 	});
 
 	
-	
-	// Products
-	
-	Route::get('products/create', function(){
-		return view('createproductform');
+	Route::post('cart-items', function(){
+		
+		$product = App\Models\Product::find(Request::input('product_id'));
+		
+		$items = array(
+		    'id' => $product->id,
+		    'name' => $product->name,
+		    'price' => $product->price,
+		    'quantity' => Request::input('quantity')
+		);
+		
+		// Make the insert...
+		Cart::insert($items);
+		return redirect('cart-items');
+		
 	});
 	
-		Route::post('products', function(App\Http\Requests\CreateProductRequest $req){
-			$product = App\Models\Product::create(Request::all());
-			
-			$newName = "photo".$product->id."jpg";
-			$file = Request::file("photo");
-			
-			$file->move("productphotos",$newName);
-			$product->photo = $newName;
-			$product->save();
-			
-			return redirect('types/'.$product->type_id);
-		});
+	// Remove item from cart
+	Route::delete('cart-items/{identifier}', function($identifier){
+		Cart::item($identifier)->remove();
+		return redirect('cart-items');
+	});
+	
+	
+	// Checkout
+	Route::post('orders', function(){
+		$order = new App\Models\Order();
+		$order->user_id = Auth::user()->id;
+		$order->status = "Pending";
+		$order->save();
+		
+		foreach(Cart::contents() as $item){
+			$order->products()->attach($item->id,
+			["quantity"=>$item->quantity]);
+		}
+		
+		Cart::destroy();
+		return redirect("types/1");
+		
+	})->middleware(['auth']);
+	
+	// Show Orders
+	Route::get('cart-orders', function(){
+		$orders = Auth::user()->orders;
+
+		return view('showorders',['orders'=>$orders]);
+	})->middleware(['auth']);
+	
 	
 		
-	
-	Route::get('products/{id}/edit', function($id){
-		$product = App\Models\Product::find($id);
-		return view('editproductform',['product'=>$product]);
-	});
-	
-		Route::put('products/{id}', function(App\Http\Requests\EditProductRequest $req, $id){
-			$product = App\Models\Product::find($id);
-			$product->fill(Request::all());
-			$product->save();
-			return redirect('types/'.$product->type_id);
-		});
-	
 });

@@ -20,5 +20,7 @@
 				</fielset>
 			</form>
 			{{ Form::close()}}
+			
+			{{Session::get('message')}}
 				
 @stop

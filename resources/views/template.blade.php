@@ -1,3 +1,4 @@
+@if(!Request::ajax())
 <!DOCTYPE html>
 <!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
 <!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
@@ -51,31 +52,48 @@
 			<nav>
 				<ul class="group">
 					@foreach(App\Models\Type::all() as $type)
-						<li><a href="{{url('types/'.$type->id)}}">{{$type->name}}</a></li>
+						<li><a class="nav-type" href="{{url('types/'.$type->id)}}">{{$type->name}}</a></li>
 					@endforeach
 					
-					<li class="clear"><a href="">Account <i class="icon-user"></i></a></li>
-					<li><a href="">Login <i class="icon-lock"></i></a></li>
+					@if(Auth::check())
+					<li class="clear"><a href="{{url('users/'.Auth::user()->id)}}">Account <i class="icon-user"></i></a></li>
+					<li><a href="{{url('logout')}}">Logout <i class="icon-lock"></i></a></li>
 					<li><a href="" >2 items <i class="icon-shopping-cart"></i></a></li>
 					<li><a href="">About</a></li>
 					<li><a href="">Contact</a></li>
+					
+					@else
+					
+					<li class="clear"><a href="{{url('users/create')}}">Register <i class="icon-user"></i></a></li>
+					<li><a href="{{url('login')}}">Login <i class="icon-lock"></i></a></li>
+					<li><a href="" >2 items <i class="icon-shopping-cart"></i></a></li>
+					<li><a href="">About</a></li>
+					<li><a href="">Contact</a></li>
+					
+					@endif
+					
 				</ul>
 			</nav>
 		</header>
 		<div class="main group">
 
+@endif
 			@yield('content')
-
+			
+@if(!Request::ajax())
 		</div>
 		<footer></footer>
 
 	</div><!-- container -->
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="{{asset('js/main.js')}}"></script>
-
+	<script src="{{asset('js/spin.js')}}"></script>
+	<script src="{{asset('js/jquery.history.js')}}"></script>
+	<script src="{{asset('js/jquery.jeditable.mini.js')}}"></script>
 
 
 <!-- End Document
 ================================================== -->
 </body>
 </html>
+@endif
